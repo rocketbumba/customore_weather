@@ -1,14 +1,16 @@
 import asyncio
+import time
+
 import aiohttp
 import json
-
+import schedule
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
 dic = {(10.76, 106.66): {'temperature': 299.27, 'humidity': 83, 'wind_speed': 1.54, 'name': 'Ho Chi Minh City'},
-       (10.96, 106.66): {'temperature': 298.16, 'humidity': 94, 'wind_speed': 1.54, 'name': 'Thu Dau Mot'},
        (11.16, 106.66): {'temperature': 297.94, 'humidity': 92, 'wind_speed': 0.98, 'name': 'Tinh Binh Duong'}}
 
+point_searched = set()
 
 async def fetch_weather(session, lat: float, lon: float):
     api_key = "56ca0f5c61e4141a46f218433e9b1459"
@@ -28,12 +30,13 @@ async def fetch_weather(session, lat: float, lon: float):
 
 
 async def main():
-    point_need_call_api = get_cities_in_bounding_box(lat_min=10.7626, lon_min=106.6602, lat_max=11.8231,
+    point_need_call_api , point_already_have = get_cities_in_bounding_box(lat_min=10.7626, lon_min=106.6602, lat_max=11.8231,
                                                      lon_max=106.7108)
 
     async with aiohttp.ClientSession() as session:
         tasks = []
         results = {}
+        temp_1 = {}
         for lat, lon in point_need_call_api:
             if (lat, lon) not in dic:
                 tasks.append(asyncio.create_task(fetch_weather(session, lat=lat, lon=lon)))
@@ -41,7 +44,12 @@ async def main():
         if results is not None:
             for temp in results:
                 dic.update(temp)
-            print(dic)
+                temp_1.update(temp)
+
+        for point in point_already_have:
+            temp_1.update(dic[point])
+
+        print(temp_1)
 
 
 def is_location_city(geolocator: Nominatim, point: tuple) -> bool:
@@ -55,21 +63,46 @@ def is_location_city(geolocator: Nominatim, point: tuple) -> bool:
     return False
 
 
-def get_cities_in_bounding_box(lat_min, lon_min, lat_max, lon_max) -> list:
+async def job(diccc: dict):
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        results = {}
+        for lat, lon in diccc.keys():
+            tasks.append(asyncio.create_task(fetch_weather(session, lat=lat, lon=lon)))
+            results = await asyncio.gather(*tasks)
+        dic_temp = {}
+        if results is not None:
+            for temp in results:
+                dic_temp.update(temp)
+        diccc = dic_temp
+
+
+
+def run_scheduler():
+    schedule.every(10).minutes.do(job(diccc=dic))
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+def get_cities_in_bounding_box(lat_min, lon_min, lat_max, lon_max) -> tuple:
     geolocator = Nominatim(user_agent="my_app", scheme='http', timeout=10000)
     lat_min, lon_min = 10.7626, 106.6602
     lat_max, lon_max = 11.8231, 106.7108
     point_need_to_call_api = []
-    point_searched = set()
+    point_already_have = set()
     for lat in range(int(lat_min * 100), int(lat_max * 100), 20):
         for lon in range(int(lon_min * 100), int(lon_max * 100), 20):
             point = (lat / 100, lon / 100)
             if point not in point_searched and is_location_city(geolocator, point):
                 point_need_to_call_api.append(point)
                 point_searched.add(point)
-
-    return point_need_to_call_api
+            if point in point_searched:
+                point_already_have.add(point)
+    return point_need_to_call_api, list(point_already_have)
 
 
 if __name__ == "__main__":
+    run_scheduler()
     asyncio.run(main())
