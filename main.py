@@ -7,13 +7,11 @@ import schedule
 from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 
-dic = {(10.76, 106.66): {'temperature': 299.27, 'humidity': 83, 'wind_speed': 1.54, 'name': 'Ho Chi Minh City'},
-       (11.16, 106.66): {'temperature': 297.94, 'humidity': 92, 'wind_speed': 0.98, 'name': 'Tinh Binh Duong'}}
-
+dic = {}
 point_searched = set()
 
 async def fetch_weather(session, lat: float, lon: float):
-    api_key = "56ca0f5c61e4141a46f218433e9b1459"
+    api_key = ""
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}"
 
     async with session.get(url) as response:
@@ -49,7 +47,6 @@ async def main():
         for point in point_already_have:
             temp_1.update(dic[point])
 
-        print(temp_1)
 
 
 def is_location_city(geolocator: Nominatim, point: tuple) -> bool:
@@ -104,5 +101,5 @@ def get_cities_in_bounding_box(lat_min, lon_min, lat_max, lon_max) -> tuple:
 
 
 if __name__ == "__main__":
-    run_scheduler()
+    # run_scheduler()
     asyncio.run(main())
