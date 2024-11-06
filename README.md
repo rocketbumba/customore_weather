@@ -1,14 +1,21 @@
-#Weather API
+# Weather API
 
-##Overview 
+## Overview 
 
-This repositiory will using Python to call OpenWeather API to get: temperature, humidity, wind speed
-Analysis Free Openweather API
-- It has limit call api perday
+This repositiory will using Python Core to call API of OpenWeather to get these information: temperature, humidity, wind speed. 
+And the goal of it is optimize numbers call API of OpenWeather because it will use free plan, it has some limit options:
+- It has limit call api per minutes
+- Only 95% Uptime
 
-So we need to limit call api. How can i do that?
--> I will cache the response request by saving it into txt file(maybe Redis after)
+So my solution:
+- Using parallel API calls to OpenWeather API to optimize waiting time.
+- Will cache the response by saving it into json file(maybe Redis after).
+- If client need to get weather of city in a bounding box. First check that coordiate have already in the Json file, if yes, will use that information to response to the client. Just call OpenWeather API by coordiate not in json file.
+- To not be outdated data information in json file, will use the schedule job libary to call every coordinate in json file to update the waether by 10 minutes.
 
-If user input call their bounding, i will check the corridate have already in the txt file. If yes, i will use that result store in txt to response to client, if not, i will use that coordinate to call api to Openweather
+## Improvement 
+My solution has limit, if the record in json is to big. For example, i save 100 hundred city in json file, every 10 minutes, i will call 100 times to update that information. It is not effcient. I will improve it using LRU cache. To be more specific, i will cache the Least Recently Used city by checking the last time it had been searched, if the last time searched is too old, i will remove it from the cache to get more space for another city
 
-To not be outdated data information, i will use the worker to call every coordinate in txt file to update the waether by 10 minutes
+I will use cronjob or message queue to call API to update the cache data. It will improve, you can seprate the sever to get information and server to call API. Will have backup server if some sever call API has trouble and reduce resource of main server
+
+
