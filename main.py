@@ -11,7 +11,7 @@ dic = {}
 point_searched = set()
 
 async def fetch_weather(session, lat: float, lon: float):
-    api_key = ""
+    api_key = "aaa"
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}"
 
     async with session.get(url) as response:
