@@ -2,21 +2,33 @@
 
 ## Overview 
 
-This repositiory will using Python Core to call API of OpenWeather to get these information: temperature, humidity, wind speed. 
-And the goal of it is optimize numbers call API of OpenWeather because it will use free plan, it has some limit options:
-- It has limit call api per minutes
-- Only 95% Uptime
+This repository will utilize Python Core to call the OpenWeather API to retrieve temperature, humidity, and wind speed data. The primary objective is to optimize the number of API calls to OpenWeather due to limitations in the free plan, which includes:
 
-So my solution:
-- Using parallel API calls to OpenWeather API to optimize waiting time.
-- Will cache the response by saving it into json file(maybe Redis after).
-- If client need to get weather of city in a bounding box. First check that coordiate have already in the Json file, if yes, will use that information to response to the client. Just call OpenWeather API by coordiate not in json file.
-- To not be outdated data information in json file, will use the schedule job libary to call every coordinate in json file to update the waether by 10 minutes.
+- Rate Limits: A maximum number of API calls per minute
+- Uptime: 95% uptime guarantee
+
+Proposed Solution:
+
+To address these constraints, we will implement the following strategies:
+
+- Parallel API Calls:
+
+  - Simultaneously make multiple API calls to OpenWeather to minimize waiting time.
+- Response Caching:
+
+  - Store API responses in JSON files (or potentially Redis later) to reduce the need for redundant calls.
+  - When a client requests weather information for a city within a bounding box, first check the JSON file.
+  - If the coordinates are found, return the cached data.
+  - Otherwise, make an API call to fetch the missing data.
+- Data Freshness:
+
+  - Employ a scheduling library to periodically update the cached weather data for all coordinates in the JSON file, ensuring data freshness.
+  - A 10-minute interval is suggested for these updates.
 
 ## Improvement 
-My solution has limit, if the record in json is to big. For example, i save 100 hundred city in json file, every 10 minutes, i will call 100 times to update that information. It is not effcient. I will improve it using LRU cache. To be more specific, i will cache the Least Recently Used city by checking the last time it had been searched, if the last time searched is too old, i will remove it from the cache to get more space for another city
+To address the scalability issue of a large JSON file, we can implement an LRU (Least Recently Used) cache. This strategy will prioritize the caching of frequently accessed cities, while removing less frequently used ones to optimize cache space.
 
-I will use cronjob or message queue to call API to update the cache data. It will improve, you can seprate the sever to get information and server to call API. Will have backup server if some sever call API has trouble and reduce resource of main server
+To update the cache efficiently, we can utilize a cron job or a message queue system. This approach allows for the separation of the server that handles client requests from the server that makes API calls. This separation can improve performance and resource utilization. Additionally, we can implement a backup server to ensure redundancy and minimize downtime in case of API call failures on the primary server.
 
 ## Run my code 🕵️
 Insert your api key into store_key.txt
