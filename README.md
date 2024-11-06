@@ -19,6 +19,9 @@ My solution has limit, if the record in json is to big. For example, i save 100 
 I will use cronjob or message queue to call API to update the cache data. It will improve, you can seprate the sever to get information and server to call API. Will have backup server if some sever call API has trouble and reduce resource of main server
 
 ## Run my code 🕵️
+Insert your api key into store_key.txt
+
+
 
 First install requirement.txt by using this command
 ```
@@ -30,5 +33,7 @@ It is a simple python file, so you only need this command to run my code, rememb
 ```
 python3 main.py
 ```
-
+```
+python3 worker.py
+```
 

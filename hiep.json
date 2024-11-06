@@ -1,0 +1,20 @@
+{
+  "(10.96, 106.66)": {
+    "temperature": 298.16,
+    "humidity": 94,
+    "wind_speed": 1.54,
+    "name": "Thu Dau Mot"
+  },
+  "(11.16, 106.66)": {
+    "temperature": 297.94,
+    "humidity": 90,
+    "wind_speed": 0.77,
+    "name": "Tinh Binh Duong"
+  },
+  "(10.76, 106.66)": {
+    "temperature": 298.72,
+    "humidity": 86,
+    "wind_speed": 1.54,
+    "name": "Ho Chi Minh City"
+  }
+}
