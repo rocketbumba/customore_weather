@@ -20,6 +20,11 @@ I will use cronjob or message queue to call API to update the cache data. It wil
 
 ## Run my code 🕵️
 
+First install requirement.txt by using this command
+```
+pip install requirement.txt
+```
+
 It is a simple python file, so you only need this command to run my code, remember, cd to code file =))
 
 ```
